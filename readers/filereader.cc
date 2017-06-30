@@ -4,7 +4,9 @@ namespace efx {
 
 FileReader::FileReader(const std::string &fileLocation)
     : ifs_(fileLocation, (std::ios::binary | std::ios::ate)),
-      len_{ifs_.tellg()} {}
+      len_{ifs_.tellg()} {
+  if (!ifs_) throw std::runtime_error("Failed to open file!");
+}
 
 // seek skip pos
 

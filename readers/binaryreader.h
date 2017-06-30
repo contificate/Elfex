@@ -5,6 +5,24 @@
 
 namespace efx {
 
+template <typename T>
+T reverse_endian(const T u) {
+  static_assert(!std::is_fundamental<T>::type
+                && std::is_unsigned<T>::type,
+                "Type must be unsigned");
+  union {
+    T u;
+    unsigned char u8[sizeof(T)];
+  } source, dest;
+
+  source.u = u;
+
+  for (size_t k = 0; k < sizeof(T); k++)
+    dest.u8[k] = source.u8[sizeof(T) - k - 1];
+
+  return dest.u;
+}
+
 #define pure 0
 
 class BinaryReader {

@@ -5,7 +5,8 @@
 #include <memory>
 #include <string>
 
-#include "binaryreader.h"
+#include "filereader.h"
+#include "memreader.h"
 
 namespace efx {
 
@@ -28,6 +29,9 @@ class ElfReader {
   std::unique_ptr<BinaryReader> reader_;
   // TODO: private constructor for encapsulated dependency injection
   // (obscurecolin)
+
+  ElfReader(std::unique_ptr<BinaryReader> reader);
+
 };
 
 }  // namespace efx
