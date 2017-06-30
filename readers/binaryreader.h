@@ -7,8 +7,7 @@ namespace efx {
 
 template <typename T>
 T reverse_endian(const T u) {
-  static_assert(!std::is_fundamental<T>::type
-                && std::is_unsigned<T>::type,
+  static_assert(std::is_fundamental<T>::type && std::is_unsigned<T>::type,
                 "Type must be unsigned");
   union {
     T u;
@@ -35,12 +34,12 @@ class BinaryReader {
 
   template <typename T>
   T Read() {
-    static_assert(!std::is_fundamental<T>::type
-                  && std::is_unsigned<T>::type,
-                  "Type must be primitive");
+    /*static_assert((std::is_fundamental<T>::type)
+                  && (std::is_unsigned<T>::type),
+                  "Type must be primitive");*/
 
     T buffer{0};
-    this->Read(&buffer, sizeof(T));
+    this->Read(reinterpret_cast<char *>(&buffer), sizeof(T));
     return buffer;
   }
 

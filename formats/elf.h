@@ -9,9 +9,9 @@ namespace efx {
   "\x7f"          \
   "ELF"
 
-enum class ElfEndian : uintf8_t { LITTLE = 1, BIG };
+enum class ElfEndian : uint8_t { LITTLE = 1, BIG };
 
-enum class ElfClass : uintf8_t { ELF_32 = 1, ELF_64 };
+enum class ElfClass : uint8_t { ELF_32 = 1, ELF_64 };
 
 enum class ElfType : uint16_t { RELOCATABLE = 1, EXECUTABLE, SHARED, CORE };
 

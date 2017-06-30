@@ -25,6 +25,11 @@ std::streampos MemReader::pos() { return current_off_; }
  */
 void MemReader::Read(char *dst, const size_t len) {
   if (!dst || (len == 0)) return;
+
+   for(size_t i = 0; i < len; i++)
+       *(dst + i) = *((buffer_ + current_off_) + i);
+
+   current_off_ += len;
 }
 
 }  // namespace efx

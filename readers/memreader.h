@@ -18,7 +18,7 @@ class MemReader : public BinaryReader {
    */
   void Seek(const std::streampos off) override;
   void Skip(const std::streamsize len) override;
-  std::streampos pos() override;
+  std::streampos pos() override; // can't be const because overload for FileReader uses tellg() which is non-const
 
   void Read(char *dst, const size_t len) override;
 
