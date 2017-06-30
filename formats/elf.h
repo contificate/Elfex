@@ -34,7 +34,6 @@ enum class ElfMachine {
 #define EI_CLASS 4
 #define EI_DATA 5
 #define EI_VERSION 6
-#define EI_VERSION 6
 #define EI_OSABI 7
 
 struct ElfHeader {

@@ -8,6 +8,10 @@ QT       += core gui
 CONFIG += c++14
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
+# linux dependencies
+# TODO: create separate build targets (obscurecolin)
+LIBS += -lcapstone -lpthread
+
 TARGET = Elfex
 TEMPLATE = app
 
@@ -28,7 +32,8 @@ SOURCES += \
     main.cc \
     readers/filereader.cc \
     readers/memreader.cc \
-    readers/elfreader.cc
+    readers/elfreader.cc \
+    disasm/disassembler.cc
 
 HEADERS += \
         elfexwindow.h \
@@ -36,7 +41,10 @@ HEADERS += \
     readers/filereader.h \
     readers/memreader.h \
     readers/elfreader.h \
-    formats/elf.h
+    formats/elf.h \
+    disasm/disassembler.h \
+    disasm/arch/arm.h \
+    disasm/exceptions/disasmexception.h
 
 FORMS += \
         elfexwindow.ui
