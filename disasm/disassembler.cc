@@ -5,7 +5,16 @@ namespace efx {
 // to be called by children
 Disassembler::Disassembler(const std::string &textSection, const cs_arch arch,
                            const cs_mode mode)
-    : instr_callback_{nullptr}, arch_{arch}, mode_{mode} {
+    : instr_callback_{nullptr},
+      buffer_{nullptr},
+      len_{0},
+      arch_{arch},
+      mode_{mode} {
+  // attain capstone handle
+  if (cs_open(arch, mode, &handle_) != CS_ERR_OK)
+    throw DisasmException("Failed to attain capstone handle!");
+
+  // map section into memory
   if (!LoadFile(textSection))
     throw DisasmException("Failed to map section for disassembly!");
 }
@@ -27,8 +36,10 @@ bool Disassembler::LoadFile(const std::string &file) {
     if (!(buffer_ = std::make_unique<uint8_t[]>(len_))) return false;
 
     // read section into buffer (should we overload for mmap?)
+    ifs.seekg(0, std::ios::beg);
     ifs.read(reinterpret_cast<char *>(buffer_.get()), len_);
-    return !!ifs;
+    // return !!ifs;
+    return true;
   }
 
   return false;
@@ -51,7 +62,6 @@ bool Disassembler::Disassemble(const uint64_t address) {
 
   while (cs_disasm_iter(handle_, const_cast<const uint8_t **>(&code), &len,
                         const_cast<uint64_t *>(&address), instruction)) {
-    // pass to architecture specific model (may create a generic model class)
     this->BuildModel(*instruction);
 
     // pass to callback context
@@ -64,5 +74,8 @@ bool Disassembler::Disassemble(const uint64_t address) {
   // TODO: check model status (obscurecolin)
   return true;
 }
+
+// free handle
+Disassembler::~Disassembler() { cs_close(&handle_); }
 
 }  // namespace efx

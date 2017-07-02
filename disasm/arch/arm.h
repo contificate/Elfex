@@ -7,7 +7,10 @@ namespace efx {
 
 namespace arm {
 
-// TODO: gpr count, NEON notes, register map?
+// TODO: NEON notes, register map?
+
+#define ARM_GPR_COUNT 0x10
+
 }  // namespace arm
 }  // namespace efx
 

@@ -33,7 +33,8 @@ SOURCES += \
     readers/filereader.cc \
     readers/memreader.cc \
     readers/elfreader.cc \
-    disasm/disassembler.cc
+    disasm/disassembler.cc \
+    disasm/armdisassembler.cc
 
 HEADERS += \
         elfexwindow.h \
@@ -44,7 +45,8 @@ HEADERS += \
     formats/elf.h \
     disasm/disassembler.h \
     disasm/arch/arm.h \
-    disasm/exceptions/disasmexception.h
+    disasm/exceptions/disasmexception.h \
+    disasm/armdisassembler.h
 
 FORMS += \
         elfexwindow.ui

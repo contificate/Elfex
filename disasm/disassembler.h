@@ -7,6 +7,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <iostream>
 
 #include "exceptions/disasmexception.h"
 
@@ -25,6 +26,8 @@ class Disassembler {
 
   void OnInstruction(const InstrCallback callback);
   bool Disassemble(const uint64_t address);
+
+  virtual ~Disassembler();
 
  private:
   bool LoadFile(const std::string& file);
