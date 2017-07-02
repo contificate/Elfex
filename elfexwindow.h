@@ -7,19 +7,16 @@ namespace Ui {
 class ElfexWindow;
 }
 
-class ElfexWindow : public QMainWindow
-{
-    Q_OBJECT
+class ElfexWindow : public QMainWindow {
+  Q_OBJECT
 
-public:
-    explicit ElfexWindow(QWidget *parent = nullptr);
+ public:
+  explicit ElfexWindow(QWidget *parent = nullptr);
 
+  ~ElfexWindow();
 
-
-    ~ElfexWindow();
-
-private:
-    Ui::ElfexWindow *ui;
+ private:
+  Ui::ElfexWindow *ui;
 };
 
-#endif // ELFEXWINDOW_H
+#endif  // ELFEXWINDOW_H
