@@ -2,6 +2,11 @@
 
 namespace efx {
 
+/*
+ * TODO: fix this class, for some reason or another it's not reading correct offsets
+ * or at least, from what I've observed, what it's reading doesn't resemble output from readelf. (obscurecolin)
+ */
+
 ElfReader::ElfReader(ElfReader&& other) { *this = std::move(other); }
 
 ElfReader& ElfReader::operator=(ElfReader&& other) {
@@ -22,8 +27,6 @@ ElfReader& ElfReader::operator=(ElfReader&& other) {
 UPtrElfReader ElfReader::CreateFromFile(const std::string& fileLocation) {
   try {
     auto fileReader = std::make_unique<FileReader>(fileLocation);
-
-    // TODO: read working header (obscurecolin)
 
     // cannot use std::make_unique, it's not friends with this class
     return UPtrElfReader(new ElfReader(std::move(fileReader)));
@@ -68,6 +71,11 @@ ElfReader::ElfReader(std::unique_ptr<BinaryReader> reader)
   reader_->Seek(0);
   reader_->Read(reinterpret_cast<char*>(&working_hdr_->e_ident), EI_NIDENT);
 
+  // check magic
+  if (std::strncmp(reinterpret_cast<const char*>(working_hdr_.get()), ELF_MAGIC,
+                   4) != 0)
+    throw std::runtime_error("ELF magic magic!");
+
   working_hdr_->e_type = static_cast<ElfType>(reader_->Read<uint16_t>());
   working_hdr_->e_machine = static_cast<ElfMachine>(reader_->Read<uint16_t>());
   working_hdr_->e_version = reader_->Read<uint32_t>();
@@ -88,10 +96,61 @@ ElfReader::ElfReader(std::unique_ptr<BinaryReader> reader)
 
   // the latter 6 fields are heterogenous
   for (unsigned i = 0; i < 6; i++) *(latter + i) = reader_->Read<uint16_t>();
+
+  // read section headers
+  ReadSectionHdrs();
 }
+
+/**
+ * @brief ElfReader::ReadSections
+ * Read all of the ELF sections.
+ */
+void ElfReader::ReadSectionHdrs() {
+  // seek to section header table
+  reader_->Seek(working_hdr_->e_shoff);
+
+  std::cout << working_hdr_->e_shnum << '\n';
+
+  for (size_t i = 0; i < working_hdr_->e_shnum; i++) {
+    auto section = std::make_unique<ElfSection>();
+
+    section->sh_name = reader_->Read<uint32_t>();
+    section->sh_type = reader_->Read<uint32_t>();
+
+    const bool k32bit = working_hdr_->Is32Bit();
+
+    if (k32bit) {
+      section->sh_addr = reader_->Read<uint32_t>();
+      section->sh_offset = reader_->Read<uint32_t>();
+      section->sh_size = reader_->Read<uint32_t>();
+    } else {
+      section->sh_addr = reader_->Read<uint64_t>();
+      section->sh_offset = reader_->Read<uint64_t>();
+      section->sh_size = reader_->Read<uint64_t>();
+    }
+
+    section->sh_link = reader_->Read<uint32_t>();
+    section->sh_info = reader_->Read<uint32_t>();
+
+    if (k32bit) {
+      section->sh_addralign = reader_->Read<uint32_t>();
+      section->sh_entsize = reader_->Read<uint32_t>();
+    } else {
+      section->sh_addralign = reader_->Read<uint64_t>();
+      section->sh_entsize = reader_->Read<uint64_t>();
+    }
+
+    // insert into map
+    section_map_.insert(SectionPair(i, std::move(section)));
+  }
+}
+
+uint16_t ElfReader::section_count() const { return working_hdr_->e_shnum; }
 
 const std::unique_ptr<ElfHeader>& ElfReader::header() const {
   return working_hdr_;
 }
+
+const SectionMap& ElfReader::section_hdrs() const { return section_map_; }
 
 }  // namespace efx

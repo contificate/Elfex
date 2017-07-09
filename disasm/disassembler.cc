@@ -23,9 +23,8 @@ void Disassembler::OnInstruction(const InstrCallback &callback) {
   instr_callback_ = callback;
 }
 
-void Disassembler::OnInstruction(InstrCallback &&callback)
-{
-    instr_callback_ = std::move(callback);
+void Disassembler::OnInstruction(InstrCallback &&callback) {
+  instr_callback_ = std::move(callback);
 }
 
 /**
