@@ -24,7 +24,8 @@ class Disassembler {
   Disassembler(const std::string& textSection, const cs_arch arch,
                const cs_mode mode);
 
-  void OnInstruction(const InstrCallback callback);
+  void OnInstruction(const InstrCallback& callback);
+  void OnInstruction(InstrCallback&& callback);
   bool Disassemble(const uint64_t address);
 
   virtual ~Disassembler();

@@ -19,8 +19,13 @@ Disassembler::Disassembler(const std::string &textSection, const cs_arch arch,
     throw DisasmException("Failed to map section for disassembly!");
 }
 
-void Disassembler::OnInstruction(const InstrCallback callback) {
-  instr_callback_ = std::move(callback);
+void Disassembler::OnInstruction(const InstrCallback &callback) {
+  instr_callback_ = callback;
+}
+
+void Disassembler::OnInstruction(InstrCallback &&callback)
+{
+    instr_callback_ = std::move(callback);
 }
 
 /**
@@ -39,7 +44,7 @@ bool Disassembler::LoadFile(const std::string &file) {
     ifs.seekg(0, std::ios::beg);
     ifs.read(reinterpret_cast<char *>(buffer_.get()), len_);
     // return !!ifs;
-    return true;
+    return ifs.is_open();
   }
 
   return false;
