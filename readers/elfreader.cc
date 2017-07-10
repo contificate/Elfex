@@ -3,8 +3,10 @@
 namespace efx {
 
 /*
- * TODO: fix this class, for some reason or another it's not reading correct offsets
- * or at least, from what I've observed, what it's reading doesn't resemble output from readelf. (obscurecolin)
+ * TODO: fix this class, for some reason or another it's not reading correct
+ * offsets
+ * or at least, from what I've observed, what it's reading doesn't resemble
+ * output from readelf. (obscurecolin)
  */
 
 ElfReader::ElfReader(ElfReader&& other) { *this = std::move(other); }
@@ -64,7 +66,7 @@ UPtrElfReader ElfReader::CreateFromMemory(const uint8_t* const buffer,
 uint64_t ElfReader::entry() const { return working_hdr_->e_entry; }
 
 ElfReader::ElfReader(std::unique_ptr<BinaryReader> reader)
-    : reader_{std::move(reader)} {
+    : reader_{std::move(reader)}, section_map_{nullptr} {
   working_hdr_ = std::unique_ptr<ElfHeader>(new ElfHeader);
 
   // read (working) header
@@ -99,6 +101,9 @@ ElfReader::ElfReader(std::unique_ptr<BinaryReader> reader)
 
   // read section headers
   ReadSectionHdrs();
+
+  // read string table as it's required for mapping every other section
+  ReadStringTable();
 }
 
 /**
@@ -106,16 +111,21 @@ ElfReader::ElfReader(std::unique_ptr<BinaryReader> reader)
  * Read all of the ELF sections.
  */
 void ElfReader::ReadSectionHdrs() {
+  // if already read, don't read again
+  if (section_map_.get()) return;
+
+  // create section map
+  section_map_ = std::make_unique<SectionMap>();
+
   // seek to section header table
   reader_->Seek(working_hdr_->e_shoff);
-
-  std::cout << working_hdr_->e_shnum << '\n';
 
   for (size_t i = 0; i < working_hdr_->e_shnum; i++) {
     auto section = std::make_unique<ElfSection>();
 
     section->sh_name = reader_->Read<uint32_t>();
     section->sh_type = reader_->Read<uint32_t>();
+    section->sh_flags = reader_->Read<uint64_t>();
 
     const bool k32bit = working_hdr_->Is32Bit();
 
@@ -141,16 +151,33 @@ void ElfReader::ReadSectionHdrs() {
     }
 
     // insert into map
-    section_map_.insert(SectionPair(i, std::move(section)));
+    section_map_->insert(SectionPair(i, std::move(section)));
   }
+}
+
+void ElfReader::ReadStringTable() {
+  if (string_table_.get()) return;
+
+  // locate string table section header
+  const auto& kStrSectionHdr = section_map_->at(working_hdr_->e_shstrndx);
+
+  // get string table length
+  const uint16_t kSize = kStrSectionHdr->sh_size;
+
+  // allocate string table
+  string_table_ = std::make_unique<const char[]>(kSize);
+
+  // seek to address of section in image file
+  reader_->Seek(kStrSectionHdr->sh_offset);
+
+  // read section
+  reader_->Read(const_cast<char*>(string_table_.get()), kSize);
 }
 
 uint16_t ElfReader::section_count() const { return working_hdr_->e_shnum; }
 
-const std::unique_ptr<ElfHeader>& ElfReader::header() const {
-  return working_hdr_;
-}
+const UPtrElfHeader& ElfReader::header() const { return working_hdr_; }
 
-const SectionMap& ElfReader::section_hdrs() const { return section_map_; }
+const UPtrStringTable& ElfReader::string_table() const { return string_table_; }
 
 }  // namespace efx

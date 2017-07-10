@@ -2,6 +2,7 @@
 #define ELF_H
 
 #include <cstdint>
+#include <iostream>
 
 namespace efx {
 
@@ -62,6 +63,31 @@ struct ElfHeader {
   bool Is32Bit() {
     return (e_ident[EI_CLASS] == static_cast<uint8_t>(ElfClass::ELF_32));
   }
+};
+
+struct ElfSection {
+    uint32_t sh_name; // relative offset string table
+    uint32_t sh_type; // type of entry
+    uint64_t sh_flags;
+    uint64_t sh_addr;
+    uint64_t sh_offset;
+    uint64_t sh_size;
+    uint32_t sh_link;
+    uint32_t sh_info;
+    uint64_t sh_addralign;
+    uint64_t sh_entsize;
+
+    friend std::ostream& operator<<(std::ostream& os, const ElfSection& s){
+        os << "sh_name: " << s.sh_name << '\n';
+        os << "sh_type: " << s.sh_type << '\n';
+        os << "sh_flags: " << s.sh_flags << '\n';
+        os << "sh_addr: " <<  s.sh_addr<< '\n';
+        os << "sh_offset: " << s.sh_offset << '\n';
+        os << "sh_size: " << s.sh_size << '\n';
+        os << "sh_addralign: " << s.sh_addralign << '\n';
+
+        return os;
+    }
 };
 
 }  // namespace efx
