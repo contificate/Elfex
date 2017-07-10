@@ -30,8 +30,8 @@ class ElfReader {
   /* implicitly deletes copy constructor(s), this class is only movable to
    * impose
    * ownership limitation */
-  ElfReader(ElfReader&& other);
-  ElfReader& operator=(ElfReader&& other);
+  ElfReader(ElfReader&& other) noexcept;
+  ElfReader& operator=(ElfReader&& other) noexcept;
 
   static UPtrElfReader CreateFromFile(const std::string& fileLocation);
   static UPtrElfReader CreateFromMemory(const uint8_t* const buffer,

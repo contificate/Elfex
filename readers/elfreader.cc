@@ -9,9 +9,9 @@ namespace efx {
  * output from readelf. (obscurecolin)
  */
 
-ElfReader::ElfReader(ElfReader&& other) { *this = std::move(other); }
+ElfReader::ElfReader(ElfReader&& other) noexcept { *this = std::move(other); }
 
-ElfReader& ElfReader::operator=(ElfReader&& other) {
+ElfReader& ElfReader::operator=(ElfReader&& other) noexcept {
   if (this != &other) {
     reader_ = std::move(other.reader_);
     other.reader_ = nullptr;
