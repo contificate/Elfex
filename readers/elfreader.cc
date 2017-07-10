@@ -15,6 +15,15 @@ ElfReader& ElfReader::operator=(ElfReader&& other) noexcept {
   if (this != &other) {
     reader_ = std::move(other.reader_);
     other.reader_ = nullptr;
+
+    working_hdr_ = std::move(other.working_hdr_);
+    other.working_hdr_ = nullptr;
+
+    section_map_ = std::move(other.section_map_);
+    other.section_map_ = nullptr;
+
+    string_table_ = std::move(other.string_table_);
+    other.string_table_ = nullptr;
   }
 
   return *this;
