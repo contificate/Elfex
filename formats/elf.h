@@ -31,6 +31,27 @@ enum class ElfMachine {
   RISCV = 0XF3
 };
 
+enum class SectionType : uint32_t {
+  SHT_NULL = 0,
+  SHT_PROGBITS = 1,
+  SHT_SYMTAB = 2,
+  SHT_STRTAB = 3,
+  SHT_RELA = 4,
+  SHT_HASH = 5,
+  SHT_DYNAMIC = 6,
+  SHT_NOTE = 7,
+  SHT_NOBITS = 8,
+  SHT_REL = 9,
+  SHT_SHLIB = 10,
+  SHT_DYNSYM = 11,
+  SHT_LOOS = 0x60000000,
+  SHT_HIOS = 0x6fffffff,
+  SHT_LOPROC = 0x70000000,
+  SHT_HIPROC = 0x7fffffff,
+  SHT_LOUSER = 0x80000000,
+  SHT_HIUSER = 0xffffffff
+};
+
 #define EI_NIDENT 0x10
 #define EI_CLASS 4
 #define EI_DATA 5
@@ -66,28 +87,28 @@ struct ElfHeader {
 };
 
 struct ElfSection {
-    uint32_t sh_name; // relative offset string table
-    uint32_t sh_type; // type of entry
-    uint64_t sh_flags;
-    uint64_t sh_addr;
-    uint64_t sh_offset;
-    uint64_t sh_size;
-    uint32_t sh_link;
-    uint32_t sh_info;
-    uint64_t sh_addralign;
-    uint64_t sh_entsize;
+  uint32_t sh_name;    // relative offset string table
+  SectionType sh_type; /** @see SectionType **/
+  uint64_t sh_flags;
+  uint64_t sh_addr;
+  uint64_t sh_offset;
+  uint64_t sh_size;
+  uint32_t sh_link;
+  uint32_t sh_info;
+  uint64_t sh_addralign;
+  uint64_t sh_entsize;
 
-    friend std::ostream& operator<<(std::ostream& os, const ElfSection& s){
-        os << "sh_name: " << s.sh_name << '\n';
-        os << "sh_type: " << s.sh_type << '\n';
-        os << "sh_flags: " << s.sh_flags << '\n';
-        os << "sh_addr: " <<  s.sh_addr<< '\n';
-        os << "sh_offset: " << s.sh_offset << '\n';
-        os << "sh_size: " << s.sh_size << '\n';
-        os << "sh_addralign: " << s.sh_addralign << '\n';
+  friend std::ostream& operator<<(std::ostream& os, const ElfSection& s) {
+    os << "sh_name: " << s.sh_name << '\n';
+    os << "sh_type: " << static_cast<uint32_t>(s.sh_type) << '\n';
+    os << "sh_flags: " << s.sh_flags << '\n';
+    os << "sh_addr: " << s.sh_addr << '\n';
+    os << "sh_offset: " << s.sh_offset << '\n';
+    os << "sh_size: " << s.sh_size << '\n';
+    os << "sh_addralign: " << s.sh_addralign << '\n';
 
-        return os;
-    }
+    return os;
+  }
 };
 
 }  // namespace efx

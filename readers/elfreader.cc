@@ -133,16 +133,17 @@ void ElfReader::ReadSectionHdrs() {
     auto section = std::make_unique<ElfSection>();
 
     section->sh_name = reader_->Read<uint32_t>();
-    section->sh_type = reader_->Read<uint32_t>();
-    section->sh_flags = reader_->Read<uint64_t>();
+    section->sh_type = static_cast<SectionType>(reader_->Read<uint32_t>());
 
     const bool k32bit = working_hdr_->Is32Bit();
 
     if (k32bit) {
+      section->sh_flags = reader_->Read<uint32_t>();
       section->sh_addr = reader_->Read<uint32_t>();
       section->sh_offset = reader_->Read<uint32_t>();
       section->sh_size = reader_->Read<uint32_t>();
     } else {
+      section->sh_flags = reader_->Read<uint64_t>();
       section->sh_addr = reader_->Read<uint64_t>();
       section->sh_offset = reader_->Read<uint64_t>();
       section->sh_size = reader_->Read<uint64_t>();
@@ -181,6 +182,42 @@ void ElfReader::ReadStringTable() {
 
   // read section
   reader_->Read(const_cast<char*>(string_table_.get()), kSize);
+}
+
+/**
+ * @brief ElfReader::ReadTextSection
+ * @param len returns length of text section (if not found, len = 0)
+ * @return mapped text section
+ */
+std::unique_ptr<uint8_t[]> ElfReader::ReadTextSection(uint64_t& len) {
+  // get section name table
+  const char* const kTable = string_table_.get();
+
+  // iterate all sections
+  for (const auto& kSection : *section_map_) {
+    // get reference to section header
+    const auto& hdr = kSection.second;
+
+    // check section (name and type)
+    if ((strcmp(".text", (kTable + hdr->sh_name)) == 0) &&
+        (hdr->sh_type == SectionType::SHT_PROGBITS)) {
+      len = hdr->sh_size;
+
+      // allocate section
+      auto buffer = std::make_unique<uint8_t[]>(len);
+
+      // seek to image offset
+      reader_->Seek(hdr->sh_offset);
+
+      // read text section into buffer
+      reader_->Read(reinterpret_cast<char*>(buffer.get()), len);
+
+      return buffer;
+    }
+  }
+
+  len = 0;
+  return nullptr;
 }
 
 uint16_t ElfReader::section_count() const { return working_hdr_->e_shnum; }

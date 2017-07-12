@@ -3,6 +3,7 @@
 
 #include <cstring>
 #include <ios>
+#include <iostream> // DEBUG
 #include <map>
 #include <memory>
 #include <string>
@@ -42,6 +43,9 @@ class ElfReader {
 
   // get section header count
   uint16_t section_count() const;
+
+  std::unique_ptr<uint8_t[]> ReadTextSection(uint64_t &len);
+
 
   /**
    * @return immutable reference to the working header being used by this reader
