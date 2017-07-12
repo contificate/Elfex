@@ -25,18 +25,25 @@ int main() {
       // write to working directory file
       std::ofstream ofs(sectionFile, std::ios::binary);
       ofs.write(reinterpret_cast<char*>(textSection.get()), length);
+      ofs.close();  // close so working disassembler can attain access to file
 
-      // create ARM disassembler
-      ARMDisassembler disasm(sectionFile);
+      try {
+        // create ARM disassembler
+        ARMDisassembler disasm(sectionFile);
 
-      // print instructions
-      disasm.OnInstruction([](const cs_insn& instruction) -> bool {
-        std::cout << instruction.mnemonic << ' ' << instruction.op_str << '\n';
-        return true;
-      });
+        // print instructions
+        disasm.OnInstruction([](const cs_insn& instruction) -> bool {
+          std::cout << instruction.mnemonic << ' ' << instruction.op_str
+                    << '\n';
+          return true;
+        });
 
-      // start disassembly
-      disasm.Disassemble(1 << 4);
+        // start disassembly
+        disasm.Disassemble(reader->header()->e_entry);
+      } catch (const DisasmException& e) {
+        std::cerr << e.what() << '\n';
+        return EXIT_FAILURE;
+      }
     }
 
   } catch (const std::runtime_error& e) {

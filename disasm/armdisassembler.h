@@ -1,6 +1,7 @@
 #ifndef ARMDISASSEMBLER_H
 #define ARMDISASSEMBLER_H
 
+#include <iostream>
 
 #include "disassembler.h"
 

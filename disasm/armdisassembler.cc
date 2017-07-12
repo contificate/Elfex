@@ -3,7 +3,7 @@
 namespace efx {
 
 ARMDisassembler::ARMDisassembler(const std::string& fileLocation)
-    : Disassembler(fileLocation, CS_ARCH_ARM, CS_MODE_ARM) {}
+    : Disassembler(fileLocation, CS_ARCH_ARM, CS_MODE_ARM) { }
 
 /**
  * @brief ARMDisassembler::BuildModel
